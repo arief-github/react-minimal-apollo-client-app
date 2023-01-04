@@ -2,7 +2,7 @@ import React from 'react';
 import axios from 'axios';
 import 'dotenv';
 
-import { GET_ORGANIZATION } from '../../gql/query';
+import { GET_ORGANIZATION, GET_ISSUES_FROM_REPOSITORY } from '../../gql/query';
 import Organization from '../Organizations';
 
 const axiosGithubGraphQL = axios.create({
@@ -34,7 +34,7 @@ class App extends React.Component {
 
   onFetchFromGithub = () => {
     axiosGithubGraphQL
-      .post('', { query: GET_ORGANIZATION })
+      .post('', { query: GET_ISSUES_FROM_REPOSITORY })
       .then(result => this.setState({
         organization: result.data.data.organization,
         errors: result.data.errors,

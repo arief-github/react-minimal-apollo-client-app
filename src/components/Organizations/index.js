@@ -1,4 +1,5 @@
 import React from 'react';
+import Repository from '../Repository';
 
 export default function Organization({ organization, errors }) {
     if(errors) {
@@ -18,6 +19,7 @@ export default function Organization({ organization, errors }) {
                 <strong>Issues from Organization:</strong>
                 <a href={organization.url}>{organization.name}</a>
             </p>
+            <Repository repository={organization.repository}/>
         </div>
     )
 }

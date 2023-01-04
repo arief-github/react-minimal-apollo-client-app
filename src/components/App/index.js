@@ -2,7 +2,7 @@ import React from 'react';
 import axios from 'axios';
 import 'dotenv';
 
-import { GET_ORGANIZATION, GET_ISSUES_FROM_REPOSITORY } from '../../gql/query';
+import { GET_ISSUES_FROM_REPOSITORY } from '../../gql/query';
 import Organization from '../Organizations';
 
 const axiosGithubGraphQL = axios.create({
@@ -12,33 +12,12 @@ const axiosGithubGraphQL = axios.create({
   }
 });
 
-const getIssuesOfRepositoryQuery = (organization, repository) => `
-  {
-    organization(login: "${organization}") {
-      name
-      url
-      repository(name: "${repository}") {
-        name
-        url
-        issues(last: 5) {
-          edges {
-            node {
-              id
-              title
-              url
-            }
-          }
-        }
-      }
-    }
-  }
-`;
-
 const getIssuesOfRepository = path => {
   const [organization, repository] = path.split('/');
 
   return axiosGithubGraphQL.post('', {
-    query: getIssuesOfRepositoryQuery(organization, repository)
+    query: GET_ISSUES_FROM_REPOSITORY,
+    variables: { organization, repository }
   })
 }
 

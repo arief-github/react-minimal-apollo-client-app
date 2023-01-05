@@ -12,19 +12,44 @@ const axiosGithubGraphQL = axios.create({
   }
 });
 
-const getIssuesOfRepository = path => {
+const getIssuesOfRepository = (path, cursor) => {
   const [organization, repository] = path.split('/');
 
   return axiosGithubGraphQL.post('', {
     query: GET_ISSUES_FROM_REPOSITORY,
-    variables: { organization, repository }
+    variables: { organization, repository, cursor }
   })
 }
 
-const resolversIssueQuery = queryResult => () => ({
-  organization: queryResult.data.data.organization,
-  errors: queryResult.data.errors,
-})
+const resolversIssueQuery = (queryResult, cursor) => (state) => {
+  const { data, errors } = queryResult.data;
+
+  if(!cursor) {
+    return {
+      organization: data.organization,
+      errors,
+    }
+  }
+
+  const { edges: oldIssues } = state.organization.repository.issues;
+  const { edges: newIssues } = data.organization.repository.issues;
+  const updatedIssues = [...oldIssues, ...newIssues];
+
+  return {
+    organization: {
+      ...data.organization,
+      repository: {
+        ...data.organization.repository,
+        issues: {
+          ...data.organization.repository.issues,
+          edges: updatedIssues,
+        },
+      },
+    },
+    errors,
+  }
+
+}
 
 class App extends React.Component {
   state = {
@@ -48,11 +73,17 @@ class App extends React.Component {
     this.onFetchFromGithub(this.state.path);
   }
 
-  onFetchFromGithub = (path) => {
-    getIssuesOfRepository(path)
+  onFetchFromGithub = (path, cursor) => {
+    getIssuesOfRepository(path, cursor)
       .then(queryResult => this.setState(
-        resolversIssueQuery(queryResult)
+        resolversIssueQuery(queryResult, cursor)
       ));
+  }
+
+  onFetchMoreIssues = () => {
+    const { endCursor } = this.state.organization.repository.issues.pageInfo;
+
+    this.onFetchFromGithub(this.state.path, endCursor);   
   }
 
   render() {
@@ -78,7 +109,7 @@ class App extends React.Component {
 
         <hr/>
         {
-          organization ? ( <Organization organization={organization} errors={errors}/> ) : (<p>No Information yet ...</p>)
+          organization ? ( <Organization organization={organization} errors={errors} onFetchMoreIssues={this.onFetchMoreIssues}/> ) : (<p>No Information yet ...</p>)
         }
         
       </div>

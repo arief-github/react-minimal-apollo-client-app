@@ -14,8 +14,13 @@ const GET_ISSUES_FROM_REPOSITORY = `
       name
       url
       repository(name: $repository) {
+        id
         name
         url
+        stargazers {
+            totalCount
+        }
+        viewerHasStarred
         issues(first: 5, after: $cursor, states: [OPEN]) {
           edges {
             node {

@@ -1,12 +1,15 @@
 import React from "react";
 
-export default function Repository({ repository, onFetchMoreIssues }) {
+export default function Repository({ repository, onFetchMoreIssues, onStarRepository }) {
   return (
     <div>
       <p>
         <strong>In Repository</strong>
         <a href={repository.url}>{repository.name}</a>
       </p>
+      <button type="button" onClick={() => onStarRepository()}>
+      	{ repository.viewerHasStarred ? 'Unstar' : 'Star' }
+      </button>
       <ul>
         {repository.issues.edges.map((issue) => (
           <li key={issue.node.id}>
